@@ -2,9 +2,9 @@
 
 ## Información del Estudiante
 
-- **Nombre:** [Tu nombre completo aquí]
-- **Carrera:** [Tu carrera]
-- **Fecha de inicio:** [Fecha]
+- **Nombre:** Diego Alejandro Banda
+- **Carrera:** PUCETEC - Desarollo de Software
+- **Fecha de inicio:** 11 de Junio del 2026
 
 ---
 
