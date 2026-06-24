@@ -1,5 +1,4 @@
 import React from 'react';
-// 1. Se agregó IonText a la lista de importaciones de Ionic
 import { IonContent, IonHeader, IonList, IonPage, IonTitle, IonToolbar, useIonViewWillEnter, IonText } from '@ionic/react';
 import RepoItem from '../components/RepoItem';
 import { Repository } from '../interfaces/Repository';

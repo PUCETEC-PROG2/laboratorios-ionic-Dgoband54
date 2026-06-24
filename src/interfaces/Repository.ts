@@ -1,11 +1,10 @@
 export interface Repository {
-    id: number;
+    id: number
     name: string;
     description: string;
     language: string;
     owner: {
         login: string;
-        avatar_url: string 
+        avatar_url: string;
     }
-
 }

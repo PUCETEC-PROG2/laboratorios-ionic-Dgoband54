@@ -1,48 +1,60 @@
-import { IonButton, IonContent, IonHeader, IonInput, IonPage, IonTextarea, IonTitle, IonToolbar } from '@ionic/react';
-import './Tab2.css';
+import axios from "axios";
+import { Repository } from "../interfaces/Repository";
+import { GithubUser } from "../interfaces/GithubUser";
 
-const Tab2: React.FC = () => {
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Tab 2</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Tab 2</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <div className="form-container">
-          <IonInput
-            className="form-field"
-            label="Nombre del repositorio"
-            labelPlacement="floating"
-            placeholder="Ingrese el nombre del repositorio"
-          />
-          <IonTextarea
-            className="form-field"
-            label="Descripcion del repositorio"
-            labelPlacement="floating"
-            placeholder="Ingrese la descripcion del repositorio"
-            rows={6}
-          />
-          <IonButton
-            className="form-field"
-            expand="block"
-            shape="round"
-            color="primary"
-          >
-            Guardar
+// Asegúrate de tener esta interfaz creada o importada correctamente
+interface RepositoryPayload {
+  name: string;
+  description?: string;
+  private?: boolean;
+}
 
-          </IonButton>
-        </div>
+const GITHUB_API_URL = import.meta.env.VITE_GITHUB_API_URL || "https://api.github.com";
+const GITHUB_API_TOKEN = import.meta.env.VITE_GITHUB_API_TOKEN;
 
-      </IonContent>
-    </IonPage>
-  );
+const githubClient = axios.create({
+  baseURL: GITHUB_API_URL,
+  headers: {
+    Authorization: `Bearer ${GITHUB_API_TOKEN}`,
+    Accept: "application/vnd.github.v3+json"
+  }
+});
+
+export const fetchRepositories = async (): Promise<Repository[]> => {
+  try { 
+    const response = await githubClient.get("user/repos", {
+      params: {
+        per_page: 100,
+        sort: "created",
+        direction: "desc",
+        affiliation: "owner",
+        t: Date.now()
+      }
+    });
+    return response.data as Repository[]; 
+  } catch (error) {
+    console.error("Error al leer repositorios", error);
+    throw new Error(`${(error as Error).message}`);
+  } 
 };
 
-export default Tab2;
+
+export const createRepository = async (repository: RepositoryPayload): Promise<Repository> => {
+  try {
+    const response = await githubClient.post("user/repos", repository);
+    return response.data as Repository;
+  } catch (error) {
+    console.error("Error al agregar ", error);
+    throw new Error(`${(error as Error).message}`);
+  }
+};
+
+export const fetchUserInfo = async (): Promise<GithubUser> => {
+  try {
+    const response = await githubClient.get("user");
+    return response.data as GithubUser;
+  } catch (error) {
+    console.error("Error al leer usuario", error);
+    throw new Error(`${(error as Error).message}`);
+  }
+};
