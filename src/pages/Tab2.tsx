@@ -1,60 +1,109 @@
-import axios from "axios";
-import { Repository } from "../interfaces/Repository";
-import { GithubUser } from "../interfaces/GithubUser";
+import React, { useState } from 'react';
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonPage,
+  IonText,
+  IonTextarea,
+  IonTitle,
+  IonToolbar
+} from '@ionic/react';
+import { useHistory } from 'react-router-dom';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { RepositoryPayload } from '../interfaces/RepositoryPayload';
+import { createRepository } from '../services/GitHubService';
+import './Tab2.css';
 
-// Asegúrate de tener esta interfaz creada o importada correctamente
-interface RepositoryPayload {
-  name: string;
-  description?: string;
-  private?: boolean;
-}
+const Tab2: React.FC = () => {
+  const history = useHistory();
+  const [repositoryData, setRepositoryData] = useState<RepositoryPayload>({
+    name: '',
+    description: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-const GITHUB_API_URL = import.meta.env.VITE_GITHUB_API_URL || "https://api.github.com";
-const GITHUB_API_TOKEN = import.meta.env.VITE_GITHUB_API_TOKEN;
+  const saveRepo = async () => {
+    if (!repositoryData.name || repositoryData.name.trim() === '') {
+      setErrorMsg('El nombre del repositorio es obligatorio');
+      return;
+    }
 
-const githubClient = axios.create({
-  baseURL: GITHUB_API_URL,
-  headers: {
-    Authorization: `Bearer ${GITHUB_API_TOKEN}`,
-    Accept: "application/vnd.github.v3+json"
-  }
-});
+    setLoading(true);
+    setErrorMsg('');
 
-export const fetchRepositories = async (): Promise<Repository[]> => {
-  try { 
-    const response = await githubClient.get("user/repos", {
-      params: {
-        per_page: 100,
-        sort: "created",
-        direction: "desc",
-        affiliation: "owner",
-        t: Date.now()
-      }
-    });
-    return response.data as Repository[]; 
-  } catch (error) {
-    console.error("Error al leer repositorios", error);
-    throw new Error(`${(error as Error).message}`);
-  } 
+    createRepository(repositoryData)
+      .then(() => history.push('/tab1'))
+      .catch((error) => {
+        const apiError = error instanceof Error ? error.message : String(error);
+        setErrorMsg(`Error al crear el repositorio: ${apiError}`);
+      })
+      .finally(() => {
+        setLoading(false);
+        setRepositoryData({
+          name: '',
+          description: ''
+        });
+      });
+  };
+
+  return (
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Formulario del repositorio</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent fullscreen>
+        <IonHeader collapse="condense">
+          <IonToolbar>
+            <IonTitle size="large">Formulario de Repositorio</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+
+        <div className="form-container">
+          <IonInput
+            className="form-field"
+            label="Nombre del repositorio"
+            labelPlacement="floating"
+            placeholder="Ingrese el nombre del repositorio"
+            value={repositoryData.name}
+            onIonChange={(e) =>
+              setRepositoryData({ ...repositoryData, name: e.detail.value ?? '' })
+            }
+          />
+          <IonTextarea
+            className="form-field"
+            label="Descripcion del repositorio"
+            labelPlacement="floating"
+            placeholder="Ingrese la descripcion del repositorio"
+            value={repositoryData.description}
+            onIonChange={(e) =>
+              setRepositoryData({ ...repositoryData, description: e.detail.value ?? '' })
+            }
+            rows={6}
+          />
+          {errorMsg !== '' && (
+            <IonText color="danger">
+              <p>{errorMsg}</p>
+            </IonText>
+          )}
+          <IonButton
+            className="form-field"
+            expand="block"
+            color="dark"
+            shape="round"
+            onClick={saveRepo}
+          >
+            Guardar
+          </IonButton>
+        </div>
+        {loading && <LoadingSpinner />}
+      </IonContent>
+    </IonPage>
+  );
 };
 
-
-export const createRepository = async (repository: RepositoryPayload): Promise<Repository> => {
-  try {
-    const response = await githubClient.post("user/repos", repository);
-    return response.data as Repository;
-  } catch (error) {
-    console.error("Error al agregar ", error);
-    throw new Error(`${(error as Error).message}`);
-  }
-};
-
-export const fetchUserInfo = async (): Promise<GithubUser> => {
-  try {
-    const response = await githubClient.get("user");
-    return response.data as GithubUser;
-  } catch (error) {
-    console.error("Error al leer usuario", error);
-    throw new Error(`${(error as Error).message}`);
-  }
-};
+export default Tab2;

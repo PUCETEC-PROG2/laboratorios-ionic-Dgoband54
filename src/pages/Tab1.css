@@ -1,0 +1,9 @@
+.delete-confirm-alert.alert-wrapper::part(button) {
+  color: #ffffff;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.delete-confirm-alert .alert-button-role-destructive::part(button) {
+  color: #eb445a;
+}

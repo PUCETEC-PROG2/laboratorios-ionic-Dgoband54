@@ -7,10 +7,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
 }
 
 .loading-spinner {
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
 }
